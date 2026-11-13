@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ClinAnat — Human Anatomy</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #21262d;
+    --bg4: #2d333b;
+    --line: #30363d;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --text3: #6e7681;
+    --accent: #58a6ff;
+    --accent2: #1f6feb;
+    --red: #f85149;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --purple: #bc8cff;
+    --teal: #39d353;
+    --orange: #f0883e;
+    --card-r: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    overflow-x: hidden;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13,17,23,.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 18px 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .topbar-logo {
+    font-family: 'Crimson Pro', serif;
+    font-size: 22px; font-weight: 600; color: var(--accent);
+    letter-spacing: -0.3px;
+  }
+  .topbar-logo span { color: var(--text); }
+  .topbar-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .topbar-right { margin-left: auto; }
+  .search-btn {
+    background: var(--bg3); border: 1px solid var(--line);
+    color: var(--text2); border-radius: 8px;
+    padding: 7px 12px; font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .search-btn:active { background: var(--bg4); }
+
+  /* ── SCREENS ── */
+  .screen { display: none; padding: 0 0 90px; }
+  .screen.active { display: block; }
+
+  /* ── HOME ── */
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #0f1e35 100%);
+    padding: 24px 18px 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero-title { font-family: 'Crimson Pro', serif; font-size: 28px; font-weight: 600; line-height: 1.25; }
+  .hero-title em { font-style: italic; color: var(--accent); }
+  .hero-desc { font-size: 13px; color: var(--text2); margin-top: 8px; line-height: 1.6; max-width: 340px; }
+
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.8px;
+    color: var(--text3); text-transform: uppercase;
+    padding: 20px 18px 10px;
+  }
+
+  .systems-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; padding: 0 18px;
+  }
+
+  .sys-card {
+    background: var(--bg2); border: 1px solid var(--line);
+    border-radius: var(--card-r); padding: 16px 14px;
+    cursor: pointer; transition: border-color .15s, background .15s;
+    position: relative; overflow: hidden;
+  }
+  .sys-card:active { background: var(--bg3); }
+  .sys-card::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 3px; height: 100%;
+  }
+  .sys-card.cardio::before { background: var(--red); }
+  .sys-card.neuro::before { background: var(--purple); }
+  .sys-card.resp::before { background: var(--accent); }
+  .sys-card.gi::before { background: var(--orange); }
+  .sys-card.msk::before { background: var(--green); }
+  .sys-card.uro::before { background: var(--yellow); }
+  .sys-card.endo::before { background: var(--teal); }
+  .sys-card.lymph::before { background: #c9d1d9; }
+
+  .sys-icon { font-size: 26px; margin-bottom: 8px; }
+  .sys-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
+  .sys-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+  .quick-facts {
+    margin: 0 18px;
+    background: var(--bg2); border: 1px solid var(--line);
+    border-radius: var(--card-r); overflow: hidden;
+  }
+  .qf-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-bottom: 1px solid var(--line);
+    cursor: pointer;
+  }
+  .qf-row:last-child { border-bottom: none; }
+  .qf-row:active { background: var(--bg3); }
+  .qf-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .qf-text { font-size: 13px; color: var(--text2); flex: 1; }
+  .qf-text strong { color: var(--text); }
+  .qf-arrow { font-size: 12px; color: var(--text3); }
+
+  /* ── SYSTEM DETAIL ── */
+  #screen-detail { padding-bottom: 90px; }
+
+  .detail-header {
+    padding: 16px 18px 14px;
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .detail-back {
+    background: none; border: none; color: var(--accent);
+    font-size: 14px; cursor: pointer; padding: 2px 0;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .detail-back:active { opacity: .7; }
+  .detail-icon { font-size: 32px; }
+  .detail-title { font-family: 'Crimson Pro', serif; font-size: 24px; font-weight: 600; }
+  .detail-subtitle { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+  .tab-bar {
+    display: flex; overflow-x: auto; gap: 0;
+    border-bottom: 1px solid var(--line);
+    scrollbar-width: none;
+    padding: 0 18px;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0; padding: 10px 14px;
+    font-size: 13px; font-weight: 500;
+    color: var(--text3); background: none; border: none;
+    border-bottom: 2px solid transparent; cursor: pointer;
+    white-space: nowrap; margin-bottom: -1px;
+    transition: color .15s;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn:active { color: var(--text); }
+
+  .tab-content { display: none; padding: 18px; }
+  .tab-content.active { display: block; }
+
+  .clinical-box {
+    background: var(--bg2); border: 1px solid var(--line);
+    border-radius: var(--card-r); padding: 14px 16px; margin-bottom: 14px;
+  }
+  .clinical-box-title {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.7px;
+    text-transform: uppercase; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .box-tag {
+    display: inline-block; padding: 2px 7px; border-radius: 4px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+  }
+  .tag-anatomy { background: rgba(88,166,255,.15); color: var(--accent); }
+  .tag-clinical { background: rgba(248,81,73,.15); color: var(--red); }
+  .tag-physio { background: rgba(63,185,80,.15); color: var(--green); }
+  .tag-path { background: rgba(240,136,62,.15); color: var(--orange); }
+
+  .prose { font-size: 14px; line-height: 1.7; color: var(--text2); }
+  .prose strong { color: var(--text); font-weight: 600; }
+  .prose em { font-style: italic; color: var(--text); }
+
+  .kv-list { list-style: none; }
+  .kv-list li {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px;
+    gap: 10px;
+  }
+  .kv-list li:last-child { border-bottom: none; }
+  .kv-key { color: var(--text2); flex-shrink: 0; max-width: 44%; }
+  .kv-val { color: var(--text); text-align: right; font-weight: 500; }
+
+  .structure-item {
+    display: flex; gap: 12px; padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .structure-item:last-child { border-bottom: none; }
+  .struct-num {
+    width: 24px; height: 24px; border-radius: 6px;
+    background: var(--bg3); display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: var(--accent); flex-shrink: 0; margin-top: 1px;
+  }
+  .struct-name { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .struct-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+  .alert-box {
+    border-radius: var(--card-r); padding: 12px 14px;
+    margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start;
+  }
+  .alert-box.red { background: rgba(248,81,73,.1); border: 1px solid rgba(248,81,73,.3); }
+  .alert-box.yellow { background: rgba(210,153,34,.1); border: 1px solid rgba(210,153,34,.3); }
+  .alert-box.blue { background: rgba(88,166,255,.1); border: 1px solid rgba(88,166,255,.3); }
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .alert-text { font-size: 13px; line-height: 1.55; }
+  .alert-text strong { font-weight: 600; }
+
+  .path-card {
+    background: var(--bg2); border: 1px solid var(--line);
+    border-radius: var(--card-r); padding: 14px 16px; margin-bottom: 10px;
+  }
+  .path-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .path-latin { font-family: 'Crimson Pro', serif; font-size: 12px; color: var(--text3); font-style: italic; margin-bottom: 10px; }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .pill {
+    padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500;
+  }
+  .pill-red { background: rgba(248,81,73,.15); color: var(--red); }
+  .pill-blue { background: rgba(88,166,255,.15); color: var(--accent); }
+  .pill-green { background: rgba(63,185,80,.15); color: var(--green); }
+  .pill-orange { background: rgba(240,136,62,.15); color: var(--orange); }
+  .pill-purple { background: rgba(188,140,255,.15); color: var(--purple); }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 430px;
+    background: rgba(13,17,23,.95); backdrop-filter: blur(16px);
+    border-top: 1px solid var(--line);
+    display: flex; padding-bottom: env(safe-area-inset-bottom, 8px);
+  }
+  .nav-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    padding: 10px 0 8px; cursor: pointer; background: none; border: none;
+    color: var(--text3); font-size: 11px; gap: 4px; transition: color .15s;
+  }
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn:active { opacity: .7; }
+  .nav-icon { font-size: 20px; }
+
+  /* ── SEARCH ── */
+  #screen-search { padding: 18px 18px 90px; }
+  .search-input-wrap {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg2); border: 1px solid var(--line);
+    border-radius: 10px; padding: 10px 14px; margin-bottom: 20px;
+  }
+  .search-input-wrap input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font-size: 14px; font-family: 'Inter', sans-serif;
+  }
+  .search-input-wrap input::placeholder { color: var(--text3); }
+  .search-results { }
+  .search-result-item {
+    padding: 12px 14px; background: var(--bg2); border: 1px solid var(--line);
+    border-radius: 8px; margin-bottom: 8px; cursor: pointer;
+  }
+  .search-result-item:active { background: var(--bg3); }
+  .sri-title { font-size: 14px; font-weight: 500; }
+  .sri-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  /* ── REFERENCE ── */
+  #screen-ref { padding: 0 18px 90px; }
+  .ref-category { margin-bottom: 20px; }
+  .ref-cat-title { font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.7px; padding: 18px 0 10px; }
+  .ref-item {
+    background: var(--bg2); border: 1px solid var(--line);
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 8px;
+  }
+  .ref-item-title { font-size: 13px; font-weight: 600; }
+  .ref-item-body { font-size: 12px; color: var(--text2); margin-top: 5px; line-height: 1.55; }
+  .ref-item-body strong { color: var(--text); }
+
+  .divider { height: 1px; background: var(--line); margin: 4px 0; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <div class="topbar-logo">Clin<span>Anat</span></div>
+    <div class="topbar-sub">Clinical Human Anatomy</div>
+  </div>
+  <div class="topbar-right">
+    <button class="search-btn" onclick="showScreen('search')">
+      🔍 Search
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════ HOME SCREEN ═══════════════════ -->
+<div id="screen-home" class="screen active">
+  <div class="hero">
+    <div class="hero-title">Human Anatomy<br><em>Clinically Oriented</em></div>
+    <div class="hero-desc">Systems-based breakdown of anatomy with clinical correlations, surface markings, and pathology pearls.</div>
+  </div>
+
+  <div class="section-label">Body Systems</div>
+
+  <div class="systems-grid">
+    <div class="sys-card cardio" onclick="openSystem('cardio')">
+      <div class="sys-icon">🫀</div>
+      <div class="sys-name">Cardiovascular</div>
+      <div class="sys-sub">Heart & Vessels</div>
+    </div>
+    <div class="sys-card neuro" onclick="openSystem('neuro')">
+      <div class="sys-icon">🧠</div>
+      <div class="sys-name">Nervous System</div>
+      <div class="sys-sub">CNS & PNS</div>
+    </div>
+    <div class="sys-card resp" onclick="openSystem('resp')">
+      <div class="sys-icon">🫁</div>
+      <div class="sys-name">Respiratory</div>
+      <div class="sys-sub">Airways & Lungs</div>
+    </div>
+    <div class="sys-card gi" onclick="openSystem('gi')">
+      <div class="sys-icon">🫃</div>
+      <div class="sys-name">Gastrointestinal</div>
+      <div class="sys-sub">Gut & Organs</div>
+    </div>
+    <div class="sys-card msk" onclick="openSystem('msk')">
+      <div class="sys-icon">🦴</div>
+      <div class="sys-name">Musculoskeletal</div>
+      <div class="sys-sub">Bones & Muscles</div>
+    </div>
+    <div class="sys-card uro" onclick="openSystem('uro')">
+      <div class="sys-icon">🫘</div>
+      <div class="sys-name">Urinary</div>
+      <div class="sys-sub">Kidneys & Tract</div>
+    </div>
+    <div class="sys-card endo" onclick="openSystem('endo')">
+      <div class="sys-icon">⚗️</div>
+      <div class="sys-name">Endocrine</div>
+      <div class="sys-sub">Glands & Hormones</div>
+    </div>
+    <div class="sys-card lymph" onclick="openSystem('lymph')">
+      <div class="sys-icon">🔵</div>
+      <div class="sys-name">Lymphatic</div>
+      <div class="sys-sub">Nodes & Vessels</div>
+    </div>
+  </div>
+
+  <div class="section-label">Clinical Quick Facts</div>
+  <div class="quick-facts">
+    <div class="qf-row" onclick="openSystem('cardio')">
+      <div class="qf-dot" style="background:var(--red)"></div>
+      <div class="qf-text"><strong>Cardiac notch</strong> — left lung indentation accommodating the pericardium</div>
+      <div class="qf-arrow">›</div>
+    </div>
+    <div class="qf-row" onclick="openSystem('neuro')">
+      <div class="qf-dot" style="background:var(--purple)"></div>
+      <div class="qf-text"><strong>Circle of Willis</strong> — anastomotic ring at the base of the brain</div>
+      <div class="qf-arrow">›</div>
+    </div>
+    <div class="qf-row" onclick="openSystem('msk')">
+      <div class="qf-dot" style="background:var(--green)"></div>
+      <div class="qf-text"><strong>McBurney's point</strong> — 1/3 from ASIS to umbilicus; appendix tip</div>
+      <div class="qf-arrow">›</div>
+    </div>
+    <div class="qf-row" onclick="openSystem('resp')">
+      <div class="qf-dot" style="background:var(--accent)"></div>
+      <div class="qf-text"><strong>Carina</strong> — tracheal bifurcation at T4/T5; sensitive cough reflex</div>
+      <div class="qf-arrow">›</div>
+    </div>
+    <div class="qf-row" onclick="openSystem('uro')">
+      <div class="qf-dot" style="background:var(--yellow)"></div>
+      <div class="qf-text"><strong>Ureter constrictions</strong> — 3 sites where calculi most commonly lodge</div>
+      <div class="qf-arrow">›</div>
+    </div>
+  </div>
+  <div style="height:10px"></div>
+</div>
+
+<!-- ═══════════════════ DETAIL SCREEN ═══════════════════ -->
+<div id="screen-detail" class="screen">
+  <div class="detail-header">
+    <div>
+      <button class="detail-back" onclick="showScreen('home')">‹ Systems</button>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+        <div class="detail-icon" id="detail-icon"></div>
+        <div>
+          <div class="detail-title" id="detail-title"></div>
+          <div class="detail-subtitle" id="detail-subtitle"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar" id="detail-tabs"></div>
+  <div id="detail-content"></div>
+</div>
+
+<!-- ═══════════════════ SEARCH SCREEN ═══════════════════ -->
+<div id="screen-search" class="screen">
+  <div class="search-input-wrap">
+    <span>🔍</span>
+    <input type="text" id="search-input" placeholder="Search structures, nerves, vessels…" oninput="doSearch(this.value)">
+  </div>
+  <div class="search-results" id="search-results">
+    <div class="section-label" style="padding-top:4px">Popular Searches</div>
+    <div class="search-result-item" onclick="openSystem('cardio')"><div class="sri-title">Heart anatomy</div><div class="sri-sub">Chambers, valves, coronary vessels</div></div>
+    <div class="search-result-item" onclick="openSystem('neuro')"><div class="sri-title">Cranial nerves</div><div class="sri-sub">12 pairs, origins, functions</div></div>
+    <div class="search-result-item" onclick="openSystem('resp')"><div class="sri-title">Lung lobes & fissures</div><div class="sri-sub">Surface projections, bronchopulmonary segments</div></div>
+    <div class="search-result-item" onclick="openSystem('msk')"><div class="sri-title">Brachial plexus</div><div class="sri-sub">Roots, trunks, divisions, cords, branches</div></div>
+    <div class="search-result-item" onclick="openSystem('uro')"><div class="sri-title">Kidney relations</div><div class="sri-sub">Retroperitoneal anatomy, ureteral course</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ REFERENCE SCREEN ═══════════════════ -->
+<div id="screen-ref" class="screen">
+  <div class="ref-category">
+    <div class="ref-cat-title">Vertebral Level Reference</div>
+    <div class="ref-item"><div class="ref-item-title">C3–C5 — Phrenic nerve</div><div class="ref-item-body">Origin of the phrenic nerve (C3,4,5 keeps the diaphragm alive). Injury above C3 causes apnoea.</div></div>
+    <div class="ref-item"><div class="ref-item-title">T4/T5 — Carina, aortic arch</div><div class="ref-item-body">Tracheal bifurcation, sternal angle of Louis, 2nd rib junction, aortic arch beginning/ending.</div></div>
+    <div class="ref-item"><div class="ref-item-title">T8 — Vena caval hiatus</div><div class="ref-item-body">IVC and right phrenic nerve pass through the diaphragm. Landmark for central line insertion.</div></div>
+    <div class="ref-item"><div class="ref-item-title">T10 — Oesophageal hiatus</div><div class="ref-item-body">Oesophagus + vagal trunks. Hiatus hernia most common at this level.</div></div>
+    <div class="ref-item"><div class="ref-item-title">T12 — Aortic hiatus</div><div class="ref-item-body">Descending aorta + thoracic duct + azygos vein pass posterior to the median arcuate ligament.</div></div>
+    <div class="ref-item"><div class="ref-item-title">L1 — Transpyloric plane</div><div class="ref-item-body">Pylorus, fundus of gallbladder, duodenojejunal flexure, superior mesenteric artery origin, hilum of kidneys.</div></div>
+    <div class="ref-item"><div class="ref-item-title">L4 — Bifurcation of aorta</div><div class="ref-item-body">Aorta bifurcates into common iliac arteries. Surface mark: level of iliac crests. CPR landmark.</div></div>
+  </div>
+  <div class="ref-category">
+    <div class="ref-cat-title">Surface Anatomy Landmarks</div>
+    <div class="ref-item"><div class="ref-item-title">Sternal angle (Angle of Louis)</div><div class="ref-item-body">T4/5; 2nd costal cartilage; bifurcation of trachea; division of superior/inferior mediastinum.</div></div>
+    <div class="ref-item"><div class="ref-item-title">McBurney's Point</div><div class="ref-item-body"><strong>1/3 from ASIS to umbilicus.</strong> Base of appendix (tip varies). Maximum tenderness in appendicitis.</div></div>
+    <div class="ref-item"><div class="ref-item-title">Murphy's Point</div><div class="ref-item-body">Right MCL at costal margin. Gallbladder fundus. Murphy's sign positive in acute cholecystitis.</div></div>
+    <div class="ref-item"><div class="ref-item-title">Femoral triangle</div><div class="ref-item-body">Boundaries: inguinal ligament (superior), sartorius (lateral), adductor longus (medial). Contents: <strong>NAVEL</strong> — Nerve, Artery, Vein, Empty space, Lymphatics.</div></div>
+  </div>
+  <div class="ref-category">
+    <div class="ref-cat-title">Cranial Nerves Summary</div>
+    <div class="ref-item"><div class="ref-item-title">Mnemonic: Oh Oh Oh To Touch And Feel Very Good Velvet Ah Heaven</div><div class="ref-item-body">CN I Olfactory · II Optic · III Oculomotor · IV Trochlear · V Trigeminal · VI Abducens · VII Facial · VIII Vestibulocochlear · IX Glossopharyngeal · X Vagus · XI Accessory · XII Hypoglossal</div></div>
+    <div class="ref-item"><div class="ref-item-title">Sensory / Motor / Both</div><div class="ref-item-body"><strong>Some Say Marry Money But My Brother Says Big Brains Matter More</strong> — S S B M B M B S B B M M (I–XII)</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ BOTTOM NAV ═══════════════════ -->
+<div class="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="showScreen('home')">
+    <span class="nav-icon">🏠</span>
+    <span>Home</span>
+  </button>
+  <button class="nav-btn" id="nav-search" onclick="showScreen('search')">
+    <span class="nav-icon">🔍</span>
+    <span>Search</span>
+  </button>
+  <button class="nav-btn" id="nav-ref" onclick="showScreen('ref')">
+    <span class="nav-icon">📋</span>
+    <span>Reference</span>
+  </button>
+</div>
+
+<script>
+// ══════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════
+const SYSTEMS = {
+  cardio: {
+    icon: '🫀', title: 'Cardiovascular', subtitle: 'Heart, Vessels & Circulation',
+    tabs: ['Overview','Structures','Physiology','Pathology','Clinical'],
+    content: {
+      Overview: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Anatomy</span></div>
+          <p class="prose">The heart is a <strong>hollow muscular organ</strong> situated in the <strong>middle mediastinum</strong>, enclosed within the fibrous pericardium. It lies obliquely — 2/3 to the left of midline — between the 2nd and 5th intercostal spaces. It rests on the diaphragm and is flanked by the lungs.</p>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Surfaces & Borders</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Anterior (sternocostal)</span><span class="kv-val">Mainly right ventricle</span></li>
+            <li><span class="kv-key">Posterior (base)</span><span class="kv-val">Mainly left atrium</span></li>
+            <li><span class="kv-key">Inferior (diaphragmatic)</span><span class="kv-val">Left + right ventricles</span></li>
+            <li><span class="kv-key">Right border</span><span class="kv-val">Right atrium</span></li>
+            <li><span class="kv-key">Left border</span><span class="kv-val">Left ventricle + left auricle</span></li>
+            <li><span class="kv-key">Apex</span><span class="kv-val">Left ventricle; 5th ICS, MCL</span></li>
+          </ul>
+        </div>
+        <div class="alert-box blue">
+          <div class="alert-icon">📌</div>
+          <div class="alert-text"><strong>Surface marking of apex beat:</strong> 5th left intercostal space, midclavicular line. Displaced laterally in left ventricular hypertrophy or dilatation.</div>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Pericardium</span></div>
+          <p class="prose"><strong>Fibrous pericardium</strong> — tough outer sac, fused to central tendon of diaphragm. <strong>Serous pericardium</strong> has two layers: <em>parietal</em> (lines fibrous) and <em>visceral</em> (epicardium). The pericardial cavity contains 15–50 mL serous fluid; >200 mL may cause cardiac tamponade.</p>
+        </div>`,
+
+      Structures: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Chambers</span></div>
+          <div class="structure-item">
+            <div class="struct-num">RA</div>
+            <div><div class="struct-name">Right Atrium</div><div class="struct-desc">Receives SVC, IVC, coronary sinus. Contains the sinoatrial node (SA node) at SVC-RA junction, and fossa ovalis (remnant of foramen ovale).</div></div>
+          </div>
+          <div class="structure-item">
+            <div class="struct-num">RV</div>
+            <div><div class="struct-name">Right Ventricle</div><div class="struct-desc">Forms anterior surface. Contains moderator band (AV bundle branch). Outflow → pulmonary trunk via pulmonary valve.</div></div>
+          </div>
+          <div class="structure-item">
+            <div class="struct-num">LA</div>
+            <div><div class="struct-name">Left Atrium</div><div class="struct-desc">Forms posterior surface (base). Receives 4 pulmonary veins. Thicker-walled than RA. Left auricle is a common site of thrombus in AF.</div></div>
+          </div>
+          <div class="structure-item">
+            <div class="struct-num">LV</div>
+            <div><div class="struct-name">Left Ventricle</div><div class="struct-desc">Thickest wall (8–12 mm vs RV 3–5 mm). Papillary muscles support mitral valve via chordae tendineae. Outflow → aorta via aortic valve.</div></div>
+          </div>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Valves</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Mitral (bicuspid)</span><span class="kv-val">Left AV; 5th ICS left sternal edge</span></li>
+            <li><span class="kv-key">Tricuspid</span><span class="kv-val">Right AV; 4th ICS left sternal edge</span></li>
+            <li><span class="kv-key">Aortic</span><span class="kv-val">3 cusps; 2nd ICS right sternal edge</span></li>
+            <li><span class="kv-key">Pulmonary</span><span class="kv-val">3 cusps; 2nd ICS left sternal edge</span></li>
+          </ul>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Coronary Arteries</span></div>
+          <div class="structure-item">
+            <div class="struct-num">1</div>
+            <div><div class="struct-name">Left Main Coronary Artery (LMCA)</div><div class="struct-desc">Bifurcates into <strong>LAD</strong> (anterior IVS, apex, anterior LV wall) and <strong>LCx</strong> (lateral and posterior LV, LA). "Left main disease" is high-risk — supplies majority of LV.</div></div>
+          </div>
+          <div class="structure-item">
+            <div class="struct-num">2</div>
+            <div><div class="struct-name">Right Coronary Artery (RCA)</div><div class="struct-desc">RA, RV, inferior LV, SA node (60%), AV node (90%), posterior IVS (right dominant). RCA occlusion → inferior MI, AV block.</div></div>
+          </div>
+        </div>`,
+
+      Physiology: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-physio">Conduction System</span></div>
+          <div class="structure-item">
+            <div class="struct-num">1</div>
+            <div><div class="struct-name">SA Node (pacemaker)</div><div class="struct-desc">SVC-RA junction. Intrinsic rate 60–100 bpm. Innervated by vagus (↓HR) and sympathetic (↑HR).</div></div>
+          </div>
+          <div class="structure-item">
+            <div class="struct-num">2</div>
+            <div><div class="struct-name">AV Node</div><div class="struct-desc">Inferior RA, above tricuspid valve. Intrinsic rate 40–60 bpm. Delay here (PR interval) allows ventricular filling.</div></div>
+          </div>
+          <div class="structure-item">
+            <div class="struct-num">3</div>
+            <div><div class="struct-name">Bundle of His → Bundle Branches</div><div class="struct-desc">Left and right bundle branches → Purkinje fibres. Intrinsic ventricular rate 20–40 bpm.</div></div>
+          </div>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-physio">Cardiac Cycle</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Systole duration</span><span class="kv-val">~0.3 s (at 70 bpm)</span></li>
+            <li><span class="kv-key">Diastole duration</span><span class="kv-val">~0.5 s</span></li>
+            <li><span class="kv-key">S1 (lub)</span><span class="kv-val">Mitral + tricuspid closure</span></li>
+            <li><span class="kv-key">S2 (dub)</span><span class="kv-val">Aortic + pulmonary closure</span></li>
+            <li><span class="kv-key">Cardiac output</span><span class="kv-val">HR × Stroke volume (~5 L/min)</span></li>
+            <li><span class="kv-key">Frank-Starling law</span><span class="kv-val">↑ preload → ↑ stroke volume</span></li>
+          </ul>
+        </div>`,
+
+      Pathology: `
+        <div class="path-card">
+          <div class="path-name">Myocardial Infarction</div>
+          <div class="path-latin">Acute coronary syndrome</div>
+          <div class="pill-row">
+            <span class="pill pill-red">STEMI</span>
+            <span class="pill pill-orange">NSTEMI</span>
+            <span class="pill pill-blue">Troponin ↑</span>
+          </div>
+          <p class="prose">Ischaemic necrosis of myocardium due to <strong>coronary artery occlusion</strong> (usually ruptured atherosclerotic plaque + thrombus). LAD occlusion → anterior MI (most common). RCA → inferior MI. LCx → lateral MI.</p>
+        </div>
+        <div class="path-card">
+          <div class="path-name">Cardiac Tamponade</div>
+          <div class="path-latin">Pericardial effusion compressing heart</div>
+          <div class="pill-row">
+            <span class="pill pill-red">Emergency</span>
+            <span class="pill pill-blue">Beck's Triad</span>
+          </div>
+          <p class="prose"><strong>Beck's Triad:</strong> Hypotension · Elevated JVP · Muffled heart sounds. Pulsus paradoxus (>10 mmHg fall in SBP with inspiration). Treatment: <strong>pericardiocentesis</strong> at left xiphocostal angle.</p>
+        </div>
+        <div class="path-card">
+          <div class="path-name">Aortic Stenosis</div>
+          <div class="path-latin">Most common valvular disease in developed world</div>
+          <div class="pill-row">
+            <span class="pill pill-orange">Systolic murmur</span>
+            <span class="pill pill-purple">Radiation to carotids</span>
+          </div>
+          <p class="prose">Harsh ejection systolic murmur, 2nd ICS right. Narrow pulse pressure. Symptoms triad: <strong>Angina · Syncope · Heart failure</strong> (in that order of appearance — median survival 5, 3, 2 years respectively once symptomatic).</p>
+        </div>`,
+
+      Clinical: `
+        <div class="alert-box red">
+          <div class="alert-icon">⚠️</div>
+          <div class="alert-text"><strong>Referred Pain — Cardiac:</strong> Cardiac ischaemia refers pain to left arm, jaw, epigastrium, neck. Innervation via T1–T4 sympathetic fibres sharing dermatomes with these areas.</div>
+        </div>
+        <div class="alert-box yellow">
+          <div class="alert-icon">📌</div>
+          <div class="alert-text"><strong>Pericardiocentesis landmark:</strong> Needle inserted at left xiphocostal angle, directed toward left shoulder at 45° — avoids coronary vessels and enters pericardial space.</div>
+        </div>
+        <div class="alert-box blue">
+          <div class="alert-icon">🩺</div>
+          <div class="alert-text"><strong>Auscultation areas:</strong> Aortic (2R), Pulmonary (2L), Tricuspid (4L sternal), Mitral (5L MCL). Murmurs radiate with blood flow.</div>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-clinical">Coronary Dominance</span></div>
+          <p class="prose">Right-dominant circulation (85%): posterior interventricular artery from RCA. Left-dominant (8%). Codominant (7%). This determines infarct pattern in multivessel disease.</p>
+        </div>`
+    }
+  },
+
+  neuro: {
+    icon: '🧠', title: 'Nervous System', subtitle: 'CNS, PNS, ANS & Cranial Nerves',
+    tabs: ['Overview','Brain','Cranial Nerves','Spinal Cord','Clinical'],
+    content: {
+      Overview: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Divisions</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">CNS</span><span class="kv-val">Brain + Spinal cord</span></li>
+            <li><span class="kv-key">PNS</span><span class="kv-val">Cranial + Spinal nerves</span></li>
+            <li><span class="kv-key">ANS — Sympathetic</span><span class="kv-val">T1–L2 origin; fight-or-flight</span></li>
+            <li><span class="kv-key">ANS — Parasympathetic</span><span class="kv-val">CN III,VII,IX,X + S2–S4</span></li>
+            <li><span class="kv-key">Enteric</span><span class="kv-val">Independent gut plexuses</span></li>
+          </ul>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Meninges (outer → inner)</span></div>
+          <div class="structure-item">
+            <div class="struct-num">1</div>
+            <div><div class="struct-name">Dura mater</div><div class="struct-desc">Tough outer fibrous layer. Splits to form dural venous sinuses. Periosteal + meningeal layers separated by potential epidural space.</div></div>
+          </div>
+          <div class="structure-item">
+            <div class="struct-num">2</div>
+            <div><div class="struct-name">Arachnoid mater</div><div class="struct-desc">Avascular. Subarachnoid space contains CSF. Lumbar cistern at L2–S2 is site for lumbar puncture (at L3/4 or L4/5 — below the cord).</div></div>
+          </div>
+          <div class="structure-item">
+            <div class="struct-num">3</div>
+            <div><div class="struct-name">Pia mater</div><div class="struct-desc">Thin, adherent to brain/cord surface. Forms filum terminale anchoring cord to coccyx.</div></div>
+          </div>
+        </div>`,
+
+      Brain: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Lobes & Functions</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Frontal</span><span class="kv-val">Motor, executive function, Broca's area (L)</span></li>
+            <li><span class="kv-key">Parietal</span><span class="kv-val">Somatosensory, spatial awareness</span></li>
+            <li><span class="kv-key">Temporal</span><span class="kv-val">Auditory, memory, Wernicke's (L)</span></li>
+            <li><span class="kv-key">Occipital</span><span class="kv-val">Visual cortex (V1 at calcarine sulcus)</span></li>
+            <li><span class="kv-key">Insula</span><span class="kv-val">Visceral sensation, taste, pain integration</span></li>
+            <li><span class="kv-key">Cerebellum</span><span class="kv-val">Ipsilateral coordination, balance</span></li>
+          </ul>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Circle of Willis</span></div>
+          <p class="prose">Anastomotic ring at base of brain formed by: <strong>ACA–AComA–ACA</strong> (anterior) + <strong>ICA–PComA–PCA</strong> (posterior) × bilateral. Supplied by 2 ICAs and 2 vertebral arteries (→ basilar artery). Berry aneurysms most common at junctions — particularly AComA junction.</p>
+        </div>
+        <div class="alert-box red">
+          <div class="alert-icon">⚠️</div>
+          <div class="alert-text"><strong>Stroke localization:</strong> MCA territory → contralateral hemiplegia (arm > leg) + aphasia (dominant hemisphere). ACA → leg > arm. PCA → hemianopia.</div>
+        </div>`,
+
+      'Cranial Nerves': `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">12 Cranial Nerves</span></div>
+          ${[
+            ['I','Olfactory','S','Smell; exits cribriform plate. Lesion → anosmia'],
+            ['II','Optic','S','Vision; optic disc in retina is blind spot. Swinging light test for RAPD'],
+            ['III','Oculomotor','M','MR, SR, IR, IO muscles + levator palpebrae. Parasympathetic: sphincter pupillae (miosis) + ciliary muscle. CN III palsy → "down-and-out" eye + fixed dilated pupil'],
+            ['IV','Trochlear','M','Superior oblique (intorsion, infraduction when adducted). Only CN to exit dorsal brainstem. Lesion → vertical diplopia'],
+            ['V','Trigeminal','B','V1 ophthalmic · V2 maxillary · V3 mandibular. Motor: muscles of mastication (V3). Corneal reflex afferent limb'],
+            ['VI','Abducens','M','Lateral rectus. Longest intracranial course → vulnerable to raised ICP → false localising sign'],
+            ['VII','Facial','B','Motor face muscles. Taste anterior 2/3 tongue. Para: lacrimal, submandibular, sublingual glands. CNVII palsy: LMN (all face) vs UMN (spares forehead)'],
+            ['VIII','Vestibulocochlear','S','Hearing + balance. Sensorineural vs conductive deafness — Rinne/Weber tests'],
+            ['IX','Glossopharyngeal','B','Taste posterior 1/3 tongue. Carotid sinus reflex. Stylopharyngeus motor'],
+            ['X','Vagus','B','Pharynx, larynx, thoracic + abdominal viscera. RLN → vocal cords. Hoarseness in RLN palsy (lung/mediastinal pathology)'],
+            ['XI','Accessory','M','Sternocleidomastoid + trapezius'],
+            ['XII','Hypoglossal','M','Tongue motor. Lesion: tongue deviates to side of lesion']
+          ].map(([n,name,type,desc]) => `
+          <div class="structure-item">
+            <div class="struct-num">${n}</div>
+            <div>
+              <div class="struct-name">${name} <span style="font-size:10px;color:var(--text3);font-weight:400">${type==='S'?'Sensory':type==='M'?'Motor':'Both'}</span></div>
+              <div class="struct-desc">${desc}</div>
+            </div>
+          </div>`).join('')}
+        </div>`,
+
+      'Spinal Cord': `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Key Tracts</span></div>
+          <div class="structure-item">
+            <div class="struct-num">↑</div>
+            <div><div class="struct-name">Dorsal columns (posterior)</div><div class="struct-desc">Ipsilateral fine touch, proprioception, vibration. Cross in medulla. Lesion → ipsilateral loss below.</div></div>
+          </div>
+          <div class="structure-item">
+            <div class="struct-num">↑</div>
+            <div><div class="struct-name">Spinothalamic tract (anterior/lateral)</div><div class="struct-desc">Contralateral pain and temperature. Cross within 1–2 spinal segments of entry. Lesion → contralateral loss below.</div></div>
+          </div>
+          <div class="structure-item">
+            <div class="struct-num">↓</div>
+            <div><div class="struct-name">Corticospinal tract (lateral)</div><div class="struct-desc">Ipsilateral voluntary motor (crosses at medullary decussation). UMN lesion above → spasticity, hyperreflexia, Babinski+.</div></div>
+          </div>
+        </div>
+        <div class="alert-box yellow">
+          <div class="alert-icon">📌</div>
+          <div class="alert-text"><strong>Brown-Séquard Syndrome</strong> (hemisection of cord): Ipsilateral UMN signs + proprioception loss; <em>contralateral</em> pain/temperature loss below lesion.</div>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Cord Level vs Vertebral Level</span></div>
+          <p class="prose">Cord ends at <strong>L1/L2</strong> in adults (conus medullaris). Below this is the <strong>cauda equina</strong> (horse's tail). Lumbar puncture at L3/4 or L4/5 is safe — no cord at this level.</p>
+        </div>`,
+
+      Clinical: `
+        <div class="alert-box red">
+          <div class="alert-icon">⚠️</div>
+          <div class="alert-text"><strong>Herniation syndromes:</strong> Uncal herniation (↑ICP) → CN III compression → ipsilateral fixed dilated pupil ("blown pupil") before contralateral hemiparesis.</div>
+        </div>
+        <div class="alert-box blue">
+          <div class="alert-icon">🩺</div>
+          <div class="alert-text"><strong>Lumbar puncture contraindications:</strong> Signs of raised ICP (papilloedema, Cushing's triad) → CT head first to exclude SOL before LP to avoid coning.</div>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-clinical">Dermatomes — Key Landmarks</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">C3/4</span><span class="kv-val">Cape distribution (shoulders)</span></li>
+            <li><span class="kv-key">C6</span><span class="kv-val">Thumb, index; biceps reflex</span></li>
+            <li><span class="kv-key">C7</span><span class="kv-val">Middle finger; triceps reflex</span></li>
+            <li><span class="kv-key">T4</span><span class="kv-val">Nipple line</span></li>
+            <li><span class="kv-key">T10</span><span class="kv-val">Umbilicus</span></li>
+            <li><span class="kv-key">L4</span><span class="kv-val">Medial leg, foot; knee jerk</span></li>
+            <li><span class="kv-key">S1</span><span class="kv-val">Lateral foot, sole; ankle jerk</span></li>
+            <li><span class="kv-key">S2–4</span><span class="kv-val">Perineum ("saddle area")</span></li>
+          </ul>
+        </div>`
+    }
+  },
+
+  resp: {
+    icon: '🫁', title: 'Respiratory', subtitle: 'Airways, Lungs & Pleurae',
+    tabs: ['Overview','Airways','Lungs','Physiology','Clinical'],
+    content: {
+      Overview: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Upper Airways</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Nasopharynx</span><span class="kv-val">Eustachian tube opening; adenoids</span></li>
+            <li><span class="kv-key">Oropharynx</span><span class="kv-val">Palatine tonsils; posterior 1/3 tongue</span></li>
+            <li><span class="kv-key">Larynx</span><span class="kv-val">C3–C6; thyroid, cricoid, arytenoid cartilages</span></li>
+            <li><span class="kv-key">Cricothyroid membrane</span><span class="kv-val">Emergency airway access; avascular</span></li>
+          </ul>
+        </div>
+        <div class="alert-box blue">
+          <div class="alert-icon">📌</div>
+          <div class="alert-text"><strong>Cricothyroidotomy:</strong> Emergency surgical airway via cricothyroid membrane. Avoids thyroid vasculature superiorly and cricoid inferiorly. Preferred over tracheotomy in acute setting.</div>
+        </div>`,
+
+      Airways: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Trachea & Bronchi</span></div>
+          <div class="structure-item">
+            <div class="struct-num">1</div>
+            <div><div class="struct-name">Trachea</div><div class="struct-desc">C6 to T4/5 (carina). 10–12 cm long, 16–20 C-shaped cartilage rings. Carina is the most sensitive cough reflex point.</div></div>
+          </div>
+          <div class="structure-item">
+            <div class="struct-num">2</div>
+            <div><div class="struct-name">Right main bronchus</div><div class="struct-desc">Wider, shorter (2.5 cm), more vertical. <strong>Inhaled foreign bodies and aspirated material preferentially enter right bronchus.</strong></div></div>
+          </div>
+          <div class="structure-item">
+            <div class="struct-num">3</div>
+            <div><div class="struct-name">Left main bronchus</div><div class="struct-desc">Narrower, longer (5 cm), more horizontal — passes beneath aortic arch. 10 bronchopulmonary segments left; 10 right.</div></div>
+          </div>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Conducting Zone → Respiratory Zone</span></div>
+          <p class="prose">Trachea → primary bronchi → secondary (lobar) → tertiary (segmental) → bronchioles → <strong>terminal bronchioles</strong> (last conducting; no gas exchange) → <strong>respiratory bronchioles → alveolar ducts → alveoli</strong> (300 million; 70 m² surface area).</p>
+        </div>`,
+
+      Lungs: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Lobes & Fissures</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Right lung (3 lobes)</span><span class="kv-val">Upper · Middle · Lower</span></li>
+            <li><span class="kv-key">Oblique fissure (R)</span><span class="kv-val">T2 spine → 6th rib (MCL)</span></li>
+            <li><span class="kv-key">Horizontal fissure (R)</span><span class="kv-val">4th costal cartilage → oblique fissure</span></li>
+            <li><span class="kv-key">Left lung (2 lobes)</span><span class="kv-val">Upper (+ lingula) · Lower</span></li>
+            <li><span class="kv-key">Cardiac notch</span><span class="kv-val">Left lung; exposes pericardium anteriorly</span></li>
+          </ul>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Lung Root Contents</span></div>
+          <p class="prose">Mnemonic: <strong>ABCs</strong> — Artery (pulmonary), Bronchus, veins, lymphatics, nerves, bronchial vessels. Right: bronchus posterior; Left: artery most superior.</p>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Pleurae</span></div>
+          <p class="prose"><strong>Visceral pleura</strong> (insensitive; no pain receptors) covers lung. <strong>Parietal pleura</strong> (pain-sensitive) lines thoracic wall. Potential pleural cavity between them. Costodiaphragmatic recess: lowest point — fluid accumulates here; accessible to thoracentesis at 9th ICS, posterior axillary line.</p>
+        </div>`,
+
+      Physiology: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-physio">Lung Volumes</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Tidal volume (TV)</span><span class="kv-val">~500 mL (resting breath)</span></li>
+            <li><span class="kv-key">IRV</span><span class="kv-val">~3,000 mL (extra inspiration)</span></li>
+            <li><span class="kv-key">ERV</span><span class="kv-val">~1,100 mL (extra expiration)</span></li>
+            <li><span class="kv-key">RV</span><span class="kv-val">~1,200 mL (can't be expelled)</span></li>
+            <li><span class="kv-key">TLC</span><span class="kv-val">~6,000 mL total</span></li>
+            <li><span class="kv-key">FRC</span><span class="kv-val">ERV + RV (~2,300 mL)</span></li>
+            <li><span class="kv-key">VC</span><span class="kv-val">TV + IRV + ERV (~4,800 mL)</span></li>
+          </ul>
+        </div>
+        <div class="alert-box blue">
+          <div class="alert-icon">📌</div>
+          <div class="alert-text"><strong>Obstructive vs Restrictive:</strong> Obstructive (asthma, COPD): ↓FEV1/FVC ratio, air trapping ↑RV. Restrictive (fibrosis): ↓TLC, FEV1/FVC normal or ↑.</div>
+        </div>`,
+
+      Clinical: `
+        <div class="alert-box red">
+          <div class="alert-icon">⚠️</div>
+          <div class="alert-text"><strong>Tension pneumothorax:</strong> Trachea deviates away from affected side. Absent breath sounds. Hypotension + ↑JVP. Immediate needle decompression — 2nd ICS, MCL — do not wait for CXR.</div>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-clinical">Aspiration Pneumonia</span></div>
+          <p class="prose">Most common site: <strong>right lower lobe</strong> (vertical right bronchus, supine patient → apical segment of right lower lobe; erect → posterior basal). Aspirated material may be tooth, peanut, or vomit.</p>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-clinical">Pleural Tap (Thoracentesis)</span></div>
+          <p class="prose">Needle inserted over superior border of rib to avoid <strong>neurovascular bundle</strong> (VAN: vein–artery–nerve) which runs in the costal groove on the inferior rib margin.</p>
+        </div>`
+    }
+  },
+
+  gi: {
+    icon: '🫃', title: 'Gastrointestinal', subtitle: 'Oesophagus to Rectum & Accessory Organs',
+    tabs: ['Overview','Gut Tube','Liver & Biliary','Peritoneum','Clinical'],
+    content: {
+      Overview: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Embryological Origin</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Foregut (coeliac)</span><span class="kv-val">Oesophagus → 2nd duodenum; liver, pancreas, spleen</span></li>
+            <li><span class="kv-key">Midgut (SMA)</span><span class="kv-val">2nd duodenum → proximal 2/3 transverse colon</span></li>
+            <li><span class="kv-key">Hindgut (IMA)</span><span class="kv-val">Distal 1/3 transverse → upper anal canal</span></li>
+          </ul>
+        </div>
+        <div class="alert-box blue">
+          <div class="alert-icon">📌</div>
+          <div class="alert-text"><strong>Referred pain:</strong> GI pain is referred to epigastrium (foregut), periumbilical (midgut), or hypogastrium (hindgut) according to embryological blood supply. Parietal peritoneum pain is sharp and well-localised.</div>
+        </div>`,
+
+      'Gut Tube': `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Key Structures & Relations</span></div>
+          <div class="structure-item">
+            <div class="struct-num">1</div>
+            <div><div class="struct-name">Oesophagus</div><div class="struct-desc">3 constrictions: cricopharyngeus (C6, 15 cm from incisors), aortic arch (T4, 23 cm), oesophagogastric junction (T10, 40 cm). Hiatus hernia at T10 diaphragmatic hiatus.</div></div>
+          </div>
+          <div class="structure-item">
+            <div class="struct-num">2</div>
+            <div><div class="struct-name">Duodenum (C-shaped, retroperitoneal)</div><div class="struct-desc">D1: pylorus to L1 (mobile). D2: descending — bile duct + pancreatic duct enter at ampulla of Vater (major duodenal papilla). D3/D4: horizontal + ascending to DJ flexure at L2.</div></div>
+          </div>
+          <div class="structure-item">
+            <div class="struct-num">3</div>
+            <div><div class="struct-name">Small intestine</div><div class="struct-desc">Jejunum (proximal 2/5): thicker wall, tall villi, more circular folds (plicae circulares), no Peyer's patches. Ileum (distal 3/5): narrower, Peyer's patches, terminal ileum absorbs B12 and bile salts.</div></div>
+          </div>
+          <div class="structure-item">
+            <div class="struct-num">4</div>
+            <div><div class="struct-name">Large intestine</div><div class="struct-desc">Identified by taeniae coli, haustra, omental appendices. Caecum (right iliac fossa) → appendix → ascending → hepatic flexure → transverse → splenic flexure → descending → sigmoid → rectum → anal canal.</div></div>
+          </div>
+        </div>`,
+
+      'Liver & Biliary': `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Liver</span></div>
+          <p class="prose">Largest gland (~1,500 g). Right hypochondrium + epigastrium. <strong>Couinaud segments</strong> (I–VIII) are surgically independent units, each with its own portal triad (portal vein, hepatic artery, bile duct) and hepatic vein drainage. Liver is supplied by both portal vein (~75%) and hepatic artery (~25%).</p>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Biliary Tree</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Calot's triangle</span><span class="kv-val">Cystic duct · Common hepatic duct · Liver surface. Contains cystic artery (fr. right hepatic)</span></li>
+            <li><span class="kv-key">Common bile duct</span><span class="kv-val">Passes posterior to duodenum, enters D2 at ampulla of Vater with pancreatic duct</span></li>
+            <li><span class="kv-key">Sphincter of Oddi</span><span class="kv-val">Controls CBD/pancreatic duct outflow. Spasm → biliary colic</span></li>
+          </ul>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Pancreas</span></div>
+          <p class="prose">Retroperitoneal. Head in C-loop of duodenum; tail touches spleen. Relations: <strong>SMA and SMV</strong> pass anterior to uncinate process. Splenic vein runs posterior to body. Pancreatic head carcinoma compresses CBD → painless obstructive jaundice + Courvoisier's sign.</p>
+        </div>`,
+
+      Peritoneum: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Peritoneal Spaces</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Hepatorenal recess (Morison's pouch)</span><span class="kv-val">Most dependent supine space — fluid accumulates here first</span></li>
+            <li><span class="kv-key">Pouch of Douglas (rectouterine/rectovesical)</span><span class="kv-val">Most dependent erect space; palpable on PR/PV exam</span></li>
+            <li><span class="kv-key">Lesser sac (omental bursa)</span><span class="kv-val">Posterior to stomach; communicates via epiploic foramen (of Winslow)</span></li>
+          </ul>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Peritoneal Folds</span></div>
+          <p class="prose"><strong>Mesenteries</strong> are double layers of peritoneum suspending gut with vessels/nerves. <strong>Omenta</strong> are folds between organs (greater omentum: stomach-transverse colon; lesser omentum: liver-stomach/duodenum). Retroperitoneal structures (Sad PUCKER): Suprarenal, Aorta/IVC, Duodenum (D2–D4), Pancreas, Ureters, Colon (ascending/descending), Kidneys/Rectum.</p>
+        </div>`,
+
+      Clinical: `
+        <div class="path-card">
+          <div class="path-name">Appendicitis</div>
+          <div class="pill-row"><span class="pill pill-red">McBurney's point</span><span class="pill pill-orange">Rovsing's sign</span></div>
+          <p class="prose">Pain migrates from periumbilical (visceral, midgut referred) to RIF (parietal somatic). McBurney's point tenderness. Rovsing's: LIF pressure → RIF pain. Psoas sign: hip extension pain (retrocaecal appendix).</p>
+        </div>
+        <div class="alert-box yellow">
+          <div class="alert-icon">📌</div>
+          <div class="alert-text"><strong>Duodenal ulcer perforation:</strong> Anterior duodenal ulcers perforate into the peritoneal cavity (peritonitis). Posterior ulcers erode into the gastroduodenal artery → haemorrhage.</div>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-clinical">Portal Hypertension — Portosystemic Anastomoses</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Oesophageal varices</span><span class="kv-val">Left gastric ↔ azygos; Saffron-staining risk</span></li>
+            <li><span class="kv-key">Rectal varices</span><span class="kv-val">Superior rectal ↔ middle/inferior rectal</span></li>
+            <li><span class="kv-key">Caput medusae</span><span class="kv-val">Paraumbilical veins ↔ superficial epigastric</span></li>
+          </ul>
+        </div>`
+    }
+  },
+
+  msk: {
+    icon: '🦴', title: 'Musculoskeletal', subtitle: 'Skeleton, Muscles, Joints & Neurovascular',
+    tabs: ['Overview','Upper Limb','Lower Limb','Spine','Clinical'],
+    content: {
+      Overview: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Skeleton</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Total bones</span><span class="kv-val">206 (adult)</span></li>
+            <li><span class="kv-key">Axial skeleton</span><span class="kv-val">80 bones (skull, vertebrae, ribs, sternum)</span></li>
+            <li><span class="kv-key">Appendicular</span><span class="kv-val">126 bones (limb girdles + limbs)</span></li>
+            <li><span class="kv-key">Bone types</span><span class="kv-val">Long, short, flat, irregular, sesamoid</span></li>
+          </ul>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Joint Classification</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Fibrous (synarthrosis)</span><span class="kv-val">Sutures, gomphoses, syndesmoses</span></li>
+            <li><span class="kv-key">Cartilaginous</span><span class="kv-val">Primary (hyaline); Secondary (fibro) — symphysis</span></li>
+            <li><span class="kv-key">Synovial (diarthrosis)</span><span class="kv-val">6 types: plane, hinge, pivot, condyloid, saddle, ball-socket</span></li>
+          </ul>
+        </div>`,
+
+      'Upper Limb': `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Brachial Plexus</span></div>
+          <p class="prose">Roots C5–T1. <strong>RTDCB</strong>: Roots → Trunks (upper C5/6, middle C7, lower C8/T1) → Divisions (anterior/posterior) → Cords (lateral, posterior, medial) → Branches.</p>
+          <div class="structure-item">
+            <div class="struct-num">↑</div>
+            <div><div class="struct-name">Erb's palsy (C5/C6)</div><div class="struct-desc">Waiter's tip — shoulder adducted, IR, elbow extended, pronated. Axillary, musculocutaneous, suprascapular nerve injury. Birth trauma: excessive shoulder depression.</div></div>
+          </div>
+          <div class="structure-item">
+            <div class="struct-num">↓</div>
+            <div><div class="struct-name">Klumpke's palsy (C8/T1)</div><div class="struct-desc">Intrinsic hand weakness + claw hand. Horner's syndrome if T1 ventral ramus involved. Birth: excessive arm traction upward.</div></div>
+          </div>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Peripheral Nerve Injuries</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Radial N. (C5–T1)</span><span class="kv-val">Wrist drop; Saturday night palsy (spiral groove)</span></li>
+            <li><span class="kv-key">Median N. (C6–T1)</span><span class="kv-val">Ape hand; Carpal tunnel; CTS</span></li>
+            <li><span class="kv-key">Ulnar N. (C8–T1)</span><span class="kv-val">Claw hand (ring+little); medial epicondyle</span></li>
+            <li><span class="kv-key">Axillary N. (C5/6)</span><span class="kv-val">Deltoid paralysis; surgical neck of humerus</span></li>
+            <li><span class="kv-key">Musculocutaneous (C5–7)</span><span class="kv-val">Loss of biceps, brachialis; coracobrachialis</span></li>
+          </ul>
+        </div>`,
+
+      'Lower Limb': `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Lumbosacral Plexus</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Femoral N. (L2–L4)</span><span class="kv-val">Anterior thigh + quadriceps; knee jerk reflex</span></li>
+            <li><span class="kv-key">Obturator N. (L2–L4)</span><span class="kv-val">Medial thigh; hip adductors</span></li>
+            <li><span class="kv-key">Sciatic N. (L4–S3)</span><span class="kv-val">Largest nerve in body; posterior thigh, all below knee</span></li>
+            <li><span class="kv-key">Common peroneal (L4–S2)</span><span class="kv-val">Foot drop; fibular neck compression</span></li>
+            <li><span class="kv-key">Tibial N. (L4–S3)</span><span class="kv-val">Plantar flexion; posterior compartment</span></li>
+            <li><span class="kv-key">Superior gluteal (L4/5–S1)</span><span class="kv-val">Gluteus medius/minimus; Trendelenburg gait</span></li>
+          </ul>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Hip Joint</span></div>
+          <p class="prose">Ball-and-socket. Acetabular labrum deepens socket. Blood supply to femoral head: retinacular vessels from medial circumflex femoral artery (branch of profunda femoris). <strong>Neck of femur fracture</strong> → risk of avascular necrosis of femoral head — particularly in subcapital fractures that interrupt retinacular vessels.</p>
+        </div>`,
+
+      Spine: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Vertebral Column</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Cervical (7)</span><span class="kv-val">C1 (atlas, no body) · C2 (axis, dens)</span></li>
+            <li><span class="kv-key">Thoracic (12)</span><span class="kv-val">Rib articulations; kyphosis</span></li>
+            <li><span class="kv-key">Lumbar (5)</span><span class="kv-val">Largest bodies; lordosis</span></li>
+            <li><span class="kv-key">Sacrum (5 fused)</span><span class="kv-val">S2–S4: parasympathetics</span></li>
+            <li><span class="kv-key">Coccyx (4 fused)</span><span class="kv-val">Attachment of pelvic floor</span></li>
+          </ul>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Intervertebral Disc</span></div>
+          <p class="prose"><strong>Nucleus pulposus</strong> (gelatinous, notochord remnant) + <strong>anulus fibrosus</strong> (fibrocartilage rings). Herniation at posterolateral aspect — where anulus is weakest and posterior longitudinal ligament is thinnest. L4/L5 (L5 root) and L5/S1 (S1 root) most common levels.</p>
+        </div>
+        <div class="alert-box yellow">
+          <div class="alert-icon">📌</div>
+          <div class="alert-text"><strong>Disc herniation root rule:</strong> L4/5 disc → compresses L5 root (exits below L5 pedicle at L5/S1 foramen). L5/S1 disc → S1 root. Rule: disc herniation compresses the root of the lower vertebra.</div>
+        </div>`,
+
+      Clinical: `
+        <div class="alert-box red">
+          <div class="alert-icon">⚠️</div>
+          <div class="alert-text"><strong>Cauda equina syndrome:</strong> L1/L2 and below — saddle anaesthesia (S2–S4), bilateral leg weakness, sphincter disturbance. Surgical emergency — decompress within 24–48h.</div>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-clinical">Compartment Syndrome</span></div>
+          <p class="prose">↑ intracompartmental pressure (>30 mmHg or within 30 mmHg of diastolic) → ischaemia. <strong>6 P's</strong>: Pain (disproportionate, with passive stretch), Pressure, Paraesthesia, Paralysis, Pallor, Pulselessness (late sign). Treatment: emergency fasciotomy.</p>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-clinical">Trendelenburg Sign</span></div>
+          <p class="prose">Pelvis drops on <strong>unsupported side</strong> when standing on affected leg. Indicates weakness of <strong>hip abductors</strong> (gluteus medius/minimus) on the weight-bearing side. Superior gluteal nerve (L4/5–S1) palsy or hip joint pathology (DDH, neck of femur fracture).</p>
+        </div>`
+    }
+  },
+
+  uro: {
+    icon: '🫘', title: 'Urinary System', subtitle: 'Kidneys, Ureters, Bladder & Urethra',
+    tabs: ['Kidneys','Ureters','Bladder','Clinical'],
+    content: {
+      Kidneys: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Position & Relations</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Level</span><span class="kv-val">T12–L3 (right slightly lower — liver)</span></li>
+            <li><span class="kv-key">Retroperitoneal</span><span class="kv-val">Perinephric fat → renal fascia (Gerota's)</span></li>
+            <li><span class="kv-key">Right kidney anterior</span><span class="kv-val">Liver, hepatic flexure, duodenum (D2), small bowel</span></li>
+            <li><span class="kv-key">Left kidney anterior</span><span class="kv-val">Spleen, stomach, pancreas, splenic flexure</span></li>
+          </ul>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Renal Hilum Contents</span></div>
+          <p class="prose">From anterior to posterior: <strong>Renal Vein · Renal Artery · pelvis of Ureter (VAU)</strong>. Left renal vein longer than right — crosses anterior to aorta below SMA (risk of "nutcracker phenomenon").</p>
+        </div>`,
+
+      Ureters: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Course & Constrictions</span></div>
+          <p class="prose">Ureter descends retroperitoneally on psoas major, crosses bifurcation of common iliac artery at pelvic brim, then passes laterally around pelvic side wall before curving anteromedially to enter bladder.</p>
+          <div class="alert-box yellow" style="margin-top:12px">
+            <div class="alert-icon">📌</div>
+            <div class="alert-text"><strong>Three ureteric constrictions</strong> (most common calculi impaction sites): (1) Pelviureteric junction (PUJ); (2) Pelvic brim (crossing iliac vessels); (3) Vesicoureteric junction (VUJ) — narrowest point.</div>
+          </div>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Important Crossings</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Gonadal vessels</span><span class="kv-val">Pass anterior to ureter → "water under the bridge"</span></li>
+            <li><span class="kv-key">Uterine artery (♀)</span><span class="kv-val">Crosses anterior to ureter at base of broad ligament — "water under the bridge" risk during hysterectomy</span></li>
+            <li><span class="kv-key">Vas deferens (♂)</span><span class="kv-val">Hooks over ureter as it enters bladder</span></li>
+          </ul>
+        </div>`,
+
+      Bladder: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Anatomy</span></div>
+          <p class="prose">Extraperitoneal (partly intraperitoneal when full). <strong>Trigone</strong>: smooth triangular area between two ureteric orifices and internal urethral orifice — no rugae, most common site of bladder tumour infiltration.</p>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Urethra</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Female urethra</span><span class="kv-val">4 cm; runs anterior to vagina; short → ↑UTI risk</span></li>
+            <li><span class="kv-key">Male urethra</span><span class="kv-val">20 cm; prostatic → membranous → spongy (penile)</span></li>
+            <li><span class="kv-key">Most common male injury site</span><span class="kv-val">Bulbar urethra (straddle injury) + membranous (pelvic fracture)</span></li>
+          </ul>
+        </div>`,
+
+      Clinical: `
+        <div class="path-card">
+          <div class="path-name">Renal Calculi</div>
+          <div class="pill-row">
+            <span class="pill pill-red">Colicky pain</span>
+            <span class="pill pill-blue">Loin to groin</span>
+            <span class="pill pill-green">Haematuria</span>
+          </div>
+          <p class="prose">Severe loin pain radiating to groin and genitalia. Haematuria. Pain worsened when stone at PUJ (flank) vs VUJ (urinary symptoms). KUB X-ray: 90% calcium oxalate/phosphate stones are radio-opaque. Uric acid stones are radiolucent — CT KUB is gold standard.</p>
+        </div>
+        <div class="alert-box red">
+          <div class="alert-icon">⚠️</div>
+          <div class="alert-text"><strong>Ureter injury in hysterectomy:</strong> Uterine artery crosses ureter 1.5–2 cm lateral to cervix. Most common site of iatrogenic ureteric injury during gynaecological surgery.</div>
+        </div>`
+    }
+  },
+
+  endo: {
+    icon: '⚗️', title: 'Endocrine', subtitle: 'Glands, Hormones & Clinical Correlations',
+    tabs: ['Overview','Glands','Hormones','Clinical'],
+    content: {
+      Overview: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Major Endocrine Glands</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Hypothalamus</span><span class="kv-val">Releasing/inhibiting hormones; master regulator</span></li>
+            <li><span class="kv-key">Anterior pituitary</span><span class="kv-val">TSH, ACTH, GH, FSH, LH, Prolactin</span></li>
+            <li><span class="kv-key">Posterior pituitary</span><span class="kv-val">ADH (vasopressin), Oxytocin (made in hypothalamus)</span></li>
+            <li><span class="kv-key">Thyroid</span><span class="kv-val">T3/T4 (follicular cells), Calcitonin (C-cells)</span></li>
+            <li><span class="kv-key">Parathyroid (×4)</span><span class="kv-val">PTH (↑Ca²⁺, ↓PO₄)</span></li>
+            <li><span class="kv-key">Adrenal cortex</span><span class="kv-val">GFR → Glucocorticoids, Fludrocortisone, sex steroids</span></li>
+            <li><span class="kv-key">Adrenal medulla</span><span class="kv-val">Adrenaline (80%), noradrenaline (20%)</span></li>
+            <li><span class="kv-key">Pancreas (islets of Langerhans)</span><span class="kv-val">α=glucagon, β=insulin, δ=somatostatin</span></li>
+          </ul>
+        </div>`,
+
+      Glands: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Thyroid Gland</span></div>
+          <p class="prose">H-shaped; anterior neck C5–T1. Two lateral lobes + isthmus (overlies 2nd–4th tracheal rings). <strong>Recurrent laryngeal nerve</strong> runs in tracheo-oesophageal groove behind thyroid — at risk in thyroidectomy → hoarseness. Superior thyroid artery (from ECA) ligated distally; inferior thyroid artery (thyrocervical trunk) — ligate distally to avoid RLN.</p>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Adrenal Glands</span></div>
+          <p class="prose">Suprarenal, retroperitoneal. Right: pyramidal, medial to IVC (tip contacts liver). Left: semilunar, medial to spleen, behind pancreatic tail. <strong>Triple arterial supply</strong> (superior/middle/inferior suprarenal arteries) but single vein: right drains to IVC, left to left renal vein.</p>
+        </div>`,
+
+      Hormones: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-physio">Calcium Regulation</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">PTH (↑Ca)</span><span class="kv-val">↑ bone resorption, ↑ renal Ca reabsorption, ↑ 1,25(OH)₂D</span></li>
+            <li><span class="kv-key">Calcitonin (↓Ca)</span><span class="kv-val">↓ osteoclast activity; minor physiological role</span></li>
+            <li><span class="kv-key">Vitamin D (↑Ca)</span><span class="kv-val">↑ gut Ca absorption; active form 1,25-dihydroxyvitamin D</span></li>
+          </ul>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-physio">Insulin</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Stimulus</span><span class="kv-val">↑Blood glucose, GLP-1, GIP, vagal stimulation</span></li>
+            <li><span class="kv-key">Actions</span><span class="kv-val">↑ glycogen synthesis, ↑ lipogenesis, ↑ protein synthesis, ↓ gluconeogenesis</span></li>
+            <li><span class="kv-key">Receptor</span><span class="kv-val">Tyrosine kinase (GLUT4 translocation in muscle/fat)</span></li>
+          </ul>
+        </div>`,
+
+      Clinical: `
+        <div class="path-card">
+          <div class="path-name">Phaeochromocytoma</div>
+          <div class="pill-row"><span class="pill pill-red">Rule of 10s</span><span class="pill pill-orange">VMA ↑</span></div>
+          <p class="prose"><strong>Rule of 10s:</strong> 10% bilateral, 10% extra-adrenal (paraganglioma), 10% malignant, 10% familial (MEN2, VHL, NF1). Presents with episodic hypertension, headache, palpitations, diaphoresis. Diagnosis: 24h urinary catecholamines/metanephrines. <strong>Alpha-block before beta-block</strong> to avoid hypertensive crisis.</p>
+        </div>
+        <div class="path-card">
+          <div class="path-name">Hyperparathyroidism</div>
+          <div class="pill-row"><span class="pill pill-blue">Bones Stones Groans Psychic moans</span></div>
+          <p class="prose">Primary: adenoma (85%), hyperplasia (14%), carcinoma (1%). Hypercalcaemia: <strong>Bones</strong> (osteitis fibrosa cystica), <strong>Stones</strong> (renal calculi), <strong>Groans</strong> (nausea, constipation), <strong>Psychic moans</strong> (depression, confusion).</p>
+        </div>`
+    }
+  },
+
+  lymph: {
+    icon: '🔵', title: 'Lymphatic System', subtitle: 'Lymph Nodes, Vessels & Immune Structures',
+    tabs: ['Overview','Node Groups','Drainage','Clinical'],
+    content: {
+      Overview: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Functions</span></div>
+          <p class="prose">The lymphatic system serves three primary functions: <strong>fluid homeostasis</strong> (returns ~3 L/day interstitial fluid to circulation), <strong>immune surveillance</strong> (lymph node filtration, lymphocyte activation), and <strong>lipid absorption</strong> (chylomicrons from gut via lacteals → thoracic duct).</p>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Thoracic Duct</span></div>
+          <p class="prose">The body's largest lymphatic vessel. Arises from <strong>cisterna chyli</strong> at L1/L2, ascends through aortic hiatus, traverses posterior mediastinum, arches left at C7 to drain into angle of left internal jugular and subclavian veins. Drains: everything below diaphragm + left side above. <strong>Right lymphatic duct</strong> drains right upper quadrant.</p>
+        </div>`,
+
+      'Node Groups': `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Head & Neck</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Occipital</span><span class="kv-val">Posterior scalp; enlarged in rubella</span></li>
+            <li><span class="kv-key">Pre/post-auricular</span><span class="kv-val">Ear/temporal region</span></li>
+            <li><span class="kv-key">Submandibular</span><span class="kv-val">Anterior oral cavity, face</span></li>
+            <li><span class="kv-key">Submental</span><span class="kv-val">Chin, floor of mouth, tip of tongue</span></li>
+            <li><span class="kv-key">Deep cervical chain</span><span class="kv-val">Along IJV; most head/neck drainage</span></li>
+            <li><span class="kv-key">Virchow's node (L supraclavicular)</span><span class="kv-val">Gastric/abdominal cancer metastasis</span></li>
+          </ul>
+        </div>
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Axillary Groups</span></div>
+          <p class="prose"><strong>APICAL</strong> mnemonic for axillary levels: Anterior (pectoral), Posterior (subscapular), Lateral, Central, Apical nodes. Sentinel lymph node biopsy in breast cancer: first draining node — usually anterior group.</p>
+        </div>`,
+
+      Drainage: `
+        <div class="clinical-box">
+          <div class="clinical-box-title"><span class="box-tag tag-anatomy">Regional Drainage Patterns</span></div>
+          <ul class="kv-list">
+            <li><span class="kv-key">Breast</span><span class="kv-val">75% → axillary; 25% → internal mammary nodes</span></li>
+            <li><span class="kv-key">Testes</span><span class="kv-val">Para-aortic nodes (L1) — not inguinal!</span></li>
+            <li><span class="kv-key">Scrotum/labia</span><span class="kv-val">Superficial inguinal</span></li>
+            <li><span class="kv-key">Rectum (above dentate)</span><span class="kv-val">Inferior mesenteric → para-aortic</span></li>
+            <li><span class="kv-key">Anal canal (below dentate)</span><span class="kv-val">Superficial inguinal</span></li>
+            <li><span class="kv-key">Stomach</span><span class="kv-val">Coeliac nodes → cisterna chyli</span></li>
+          </ul>
+        </div>`,
+
+      Clinical: `
+        <div class="alert-box yellow">
+          <div class="alert-icon">📌</div>
+          <div class="alert-text"><strong>Testicular cancer lymph drainage:</strong> Testes drain to para-aortic nodes at L1, NOT inguinal nodes (which drain the scrotum). Orchidopexy does NOT change lymphatic drainage. Inguinal node enlargement from testicular cancer implies scrotal involvement or prior surgery.</div>
+        </div>
+        <div class="path-card">
+          <div class="path-name">Chylothorax</div>
+          <div class="pill-row"><span class="pill pill-blue">Thoracic duct injury</span><span class="pill pill-orange">Milky effusion</span></div>
+          <p class="prose">Thoracic duct injury (trauma, oesophageal surgery, lymphoma) → chyle accumulates in pleural space. Milky appearance. High triglycerides (>1.1 mmol/L), lymphocytosis. Treatment: dietary fat restriction, octreotide; surgical ligation if persistent.</p>
+        </div>
+        <div class="alert-box red">
+          <div class="alert-icon">⚠️</div>
+          <div class="alert-text"><strong>Virchow's node (Troisier's sign):</strong> Enlarged left supraclavicular node is a classic sign of intra-abdominal malignancy (gastric cancer most classic). Lymph drains via thoracic duct — tumour cells reach left supraclavicular region.</div>
+        </div>`
+    }
+  }
+};
+
+// ══════════════════════════════════════
+//  SEARCH INDEX
+// ══════════════════════════════════════
+const SEARCH_INDEX = [
+  {term:'heart anatomy', sys:'cardio', note:'Chambers, valves, pericardium'},
+  {term:'coronary arteries', sys:'cardio', note:'LAD, LCx, RCA territories'},
+  {term:'cardiac tamponade', sys:'cardio', note:'Beck\'s triad, pericardiocentesis'},
+  {term:'myocardial infarction', sys:'cardio', note:'STEMI, NSTEMI, territories'},
+  {term:'aortic stenosis', sys:'cardio', note:'Systolic murmur, triad'},
+  {term:'circle of willis', sys:'neuro', note:'Anastomotic ring, berry aneurysms'},
+  {term:'cranial nerves', sys:'neuro', note:'12 pairs, origins, functions'},
+  {term:'spinal cord tracts', sys:'neuro', note:'Dorsal columns, spinothalamic, corticospinal'},
+  {term:'brown sequard', sys:'neuro', note:'Hemisection syndrome'},
+  {term:'dermatomes', sys:'neuro', note:'Landmark levels T4, T10, S2–4'},
+  {term:'trachea bronchi', sys:'resp', note:'Carina, right vs left bronchus'},
+  {term:'lung lobes fissures', sys:'resp', note:'Right 3 lobes, left 2 lobes'},
+  {term:'tension pneumothorax', sys:'resp', note:'Emergency needle decompression'},
+  {term:'pleural effusion', sys:'resp', note:'Thoracentesis landmarks'},
+  {term:'appendicitis', sys:'gi', note:'McBurney\'s point, referred pain'},
+  {term:'portal hypertension', sys:'gi', note:'Portosystemic anastomoses'},
+  {term:'liver segments', sys:'gi', note:'Couinaud 8 segments'},
+  {term:'pancreas', sys:'gi', note:'Relations, ductal anatomy, carcinoma'},
+  {term:'brachial plexus', sys:'msk', note:'Roots, trunks, divisions, branches'},
+  {term:'erb palsy klumpke', sys:'msk', note:'Upper vs lower plexus injury'},
+  {term:'compartment syndrome', sys:'msk', note:'6 P\'s, fasciotomy'},
+  {term:'intervertebral disc', sys:'msk', note:'Herniation, L4/5, L5/S1'},
+  {term:'cauda equina', sys:'msk', note:'Saddle anaesthesia, emergency'},
+  {term:'ureteric calculi', sys:'uro', note:'3 constrictions, impaction sites'},
+  {term:'ureteric injury', sys:'uro', note:'Hysterectomy complication'},
+  {term:'kidney relations', sys:'uro', note:'Retroperitoneal anatomy'},
+  {term:'phaeochromocytoma', sys:'endo', note:'Rule of 10s, alpha then beta block'},
+  {term:'thyroid anatomy', sys:'endo', note:'RLN, vasculature, thyroidectomy'},
+  {term:'virchow node', sys:'lymph', note:'Gastric cancer, Troisier\'s sign'},
+  {term:'testicular lymph drainage', sys:'lymph', note:'Para-aortic, not inguinal'},
+  {term:'thoracic duct', sys:'lymph', note:'Cisterna chyli, left IJV junction'},
+];
+
+// ══════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const nb = document.getElementById('nav-' + id);
+  if (nb) nb.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function openSystem(sysKey) {
+  const sys = SYSTEMS[sysKey];
+  if (!sys) return;
+
+  document.getElementById('detail-icon').textContent = sys.icon;
+  document.getElementById('detail-title').textContent = sys.title;
+  document.getElementById('detail-subtitle').textContent = sys.subtitle;
+
+  // Build tabs
+  const tabBar = document.getElementById('detail-tabs');
+  tabBar.innerHTML = sys.tabs.map((t,i) =>
+    `<button class="tab-btn${i===0?' active':''}" onclick="switchTab(this,'${sysKey}','${t}')">${t}</button>`
+  ).join('');
+
+  // Build content
+  const contentArea = document.getElementById('detail-content');
+  contentArea.innerHTML = sys.tabs.map((t,i) =>
+    `<div class="tab-content${i===0?' active':''}" id="tab-${sysKey}-${t.replace(/ /g,'_')}">${sys.content[t]||''}</div>`
+  ).join('');
+
+  showScreen('detail');
+}
+
+function switchTab(btn, sysKey, tabName) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(`tab-${sysKey}-${tabName.replace(/ /g,'_')}`).classList.add('active');
+}
+
+function doSearch(q) {
+  const container = document.getElementById('search-results');
+  if (!q.trim()) {
+    container.innerHTML = `<div class="section-label" style="padding-top:4px">Popular Searches</div>
+      <div class="search-result-item" onclick="openSystem('cardio')"><div class="sri-title">Heart anatomy</div><div class="sri-sub">Chambers, valves, coronary vessels</div></div>
+      <div class="search-result-item" onclick="openSystem('neuro')"><div class="sri-title">Cranial nerves</div><div class="sri-sub">12 pairs, origins, functions</div></div>
+      <div class="search-result-item" onclick="openSystem('resp')"><div class="sri-title">Lung lobes & fissures</div><div class="sri-sub">Surface projections</div></div>
+      <div class="search-result-item" onclick="openSystem('msk')"><div class="sri-title">Brachial plexus</div><div class="sri-sub">Roots, trunks, divisions, branches</div></div>`;
+    return;
+  }
+
+  const lq = q.toLowerCase();
+  const hits = SEARCH_INDEX.filter(i => i.term.includes(lq) || i.note.toLowerCase().includes(lq));
+
+  if (!hits.length) {
+    container.innerHTML = `<p style="color:var(--text3);font-size:14px;padding:20px 0">No results for "${q}"</p>`;
+    return;
+  }
+
+  container.innerHTML = hits.map(h => {
+    const sys = SYSTEMS[h.sys];
+    return `<div class="search-result-item" onclick="openSystem('${h.sys}')">
+      <div class="sri-title">${sys.icon} ${h.term.charAt(0).toUpperCase()+h.term.slice(1)}</div>
+      <div class="sri-sub">${h.note} · ${sys.title}</div>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
